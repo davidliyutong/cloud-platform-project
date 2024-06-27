@@ -39,7 +39,7 @@ datastore:
     create: true
     pvc: clpl-mongodb-data
     storage: "10Gi"
-    storageClassName: null
+    storageClassName: ""
   svc:
     name: clpl-mongodb
     port: 27017
@@ -57,7 +57,7 @@ apiserver:
     create: true
     pvc: clpl-apiserver-log
     storage: "5Gi"
-    storageClassName: null
+    storageClassName: ""
   svc:
     name: clpl-apiserver
     port: 8080
@@ -72,10 +72,11 @@ apiserver:
       baseURL: "https://authentik.example.com/application/o"
       clientID: "xxx"
       clientSecret: "yyy"
-      frontendLoginURL: "http://127.0.0.1:8081/login"
       name: "cloud-platform"
-      redirectURL: "http://127.0.0.1:8081/v1/auth/oidc/authorize"
-      scopes: "openid+profile+email"
+      scopes: 
+        - openid
+        - profile
+        - email
       userFilter: "{}"
       userInfoPath: "$"
       userNamePath: "preferred_username"

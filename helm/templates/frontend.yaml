@@ -1,6 +1,6 @@
 ---
 {{ if eq .Values.frontend.env.coreDNS "" }}
-{{ required "The value .Values.frontend.env.coreDNS cannot be empty" .Values.item }}
+{{ required "The value .Values.frontend.env.coreDNS cannot be empty" }}
 {{ end }}
 # frontend deployment
 apiVersion: apps/v1

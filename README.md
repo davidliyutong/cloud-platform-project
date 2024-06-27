@@ -63,10 +63,17 @@ ansible-playbook -i <path_to_inventory> <path_to_playbook>
 
 Currently, this project only support installation via Helm. To install this project, make sure Helm is installed and Kubectl is properly configured.
 
-First, create a namespace `clpl
+First, create the namespace `clpl`, which is namespace for project
 
 ```shell
 kubectl create ns clpl
+```
+
+Create CustomResourceDefinitions
+
+```shell
+kubectl apply -f helm/crds/oidcconfigs.yaml
+kubectl apply -f helm/crds/siteconfigs.yaml
 ```
 
 Create a `value.yaml` by copying the template:

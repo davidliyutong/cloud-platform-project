@@ -1,0 +1,48 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: oidcconfigs.clpl.davidliyutong.github.io
+spec:
+  group: clpl.davidliyutong.github.io
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              baseURL:
+                type: string
+              clientID:
+                type: string
+              clientSecret:
+                type: string
+              frontendLoginURL:
+                type: string
+              name:
+                type: string
+              redirectURL:
+                type: string
+              scopes:
+                type: array
+                items:
+                  type: string
+              userFilter:
+                type: string
+              userInfoPath:
+                type: string
+              userNamePath:
+                type: string
+              emailPath:
+                type: string
+  scope: Namespaced
+  names:
+    plural: oidcconfigs
+    singular: oidcconfig
+    kind: OIDCConfig
+    shortNames:
+    - oc

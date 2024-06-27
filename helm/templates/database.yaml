@@ -60,6 +60,9 @@ metadata:
   name: {{ .Values.datastore.volume.pvc }}
   namespace: {{ .Values.namespace }}
 spec:
+  {{ if eq .Values.datastore.volume.storageClassName "" }}
+  {{ required "The value .Values.datastore.volume.storageClassName cannot be empty" .Values.datastore.volume.storageClassName }}
+  {{ end }}
   storageClassName: {{ .Values.datastore.volume.storageClassName }}
   accessModes:
     - ReadWriteOnce

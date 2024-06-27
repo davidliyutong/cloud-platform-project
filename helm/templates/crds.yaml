@@ -1,0 +1,32 @@
+apiVersion: "clpl.davidliyutong.github.io/v1"
+kind: SiteConfig
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  coderHostname: "coder.{{ .Values.tls.domain }}"
+  coderTLSSecret: "coder-{{ .Values.tls.label }}-tls"
+  vncHostname: "vnc.{{ .Values.tls.domain }}"
+  vncTLSSecret: "vnc-{{ .Values.tls.label }}-tls"
+  sshHostname: "ssh.{{ .Values.tls.domain }}"
+  sshTLSSecret: "ssh-{{ .Values.tls.label }}-tls"
+  authEndpoint: "apiserver.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.apiserver.svc.port }}"
+---
+apiVersion: "clpl.davidliyutong.github.io/v1"
+kind: OIDCConfig
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  baseURL: {{ .Values.apiserver.env.oidc.baseURL }}
+  clientID: {{ .Values.apiserver.env.oidc.clientID }}
+  clientSecret: {{ .Values.apiserver.env.oidc.clientSecret }}
+  frontendLoginURL: "https://clpl.{{ .Values.tls.domain }}/login"
+  name: {{ .Values.apiserver.env.oidc.name }}
+  redirectURL: "https://clpl.{{ .Values.tls.domain }}/v1/auth/oidc/authorize"
+  scopes: 
+    {{- range .Values.apiserver.env.oidc.scopes }}
+    - {{ . }}
+    {{- end }}
+  userFilter: "{{ .Values.apiserver.env.oidc.userFilter }}" # force string
+  userInfoPath: {{ .Values.apiserver.env.oidc.userInfoPath }}
+  userNamePath: {{ .Values.apiserver.env.oidc.userNamePath }}
+  emailPath: {{ .Values.apiserver.env.oidc.emailPath }}

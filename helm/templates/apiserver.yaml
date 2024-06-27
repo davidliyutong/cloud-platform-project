@@ -77,15 +77,15 @@ spec:
             - name: CLPL_OIDC_CLIENTSECRET
               value: {{ .Values.apiserver.env.oidc.clientSecret }}
             - name: CLPL_OIDC_FRONTENDLOGINURL
-              value: {{ .Values.apiserver.env.oidc.frontendLoginURL }}
+              value: "https://clpl.{{ .Values.tls.domain }}/login"
             - name: CLPL_OIDC_NAME
               value: {{ .Values.apiserver.env.oidc.name }}
             - name: CLPL_OIDC_REDIRECTURL
-              value: {{ .Values.apiserver.env.oidc.redirectURL }}
+              value: "https://clpl.{{ .Values.tls.domain }}/v1/auth/oidc/authorize"
             - name: CLPL_OIDC_SCOPE
-              value: {{ .Values.apiserver.env.oidc.scopes }}
+              value: {{ join "+" .Values.apiserver.env.oidc.scopes }}
             - name: CLPL_OIDC_USERFILTER
-              value: "{{ .Values.apiserver.env.oidc.userFilter }}"
+              value: "{{ .Values.apiserver.env.oidc.userFilter }}" # force string
             - name: CLPL_OIDC_USERINFOPATH
               value: {{ .Values.apiserver.env.oidc.userInfoPath }}
             - name: CLPL_OIDC_USERNAMEPATH
@@ -123,6 +123,9 @@ metadata:
   name: {{ .Values.apiserver.volume.pvc }}
   namespace: {{ .Values.namespace }}
 spec:
+  {{ if eq .Values.apiserver.volume.storageClassName "" }}
+  {{ required "The value .Values.apiserver.volume.storageClassName cannot be empty" .Values.apiserver.volume.storageClassName  }}
+  {{ end }}
   storageClassName: {{ .Values.apiserver.volume.storageClassName }}
   accessModes:
     - ReadWriteOnce
