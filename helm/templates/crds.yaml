@@ -10,6 +10,7 @@ spec:
   sshHostname: "ssh.{{ .Values.tls.domain }}"
   sshTLSSecret: "ssh-{{ .Values.tls.label }}-tls"
   authEndpoint: "apiserver.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.apiserver.svc.port }}"
+  nginxClass: {{ .Values.ingress.className }}
 ---
 apiVersion: "clpl.davidliyutong.github.io/v1"
 kind: OIDCConfig
@@ -17,6 +18,11 @@ metadata:
   name: {{ .Release.Name }}
 spec:
   baseURL: {{ .Values.apiserver.env.oidc.baseURL }}
+  authorizationURL: {{ .Values.apiserver.env.oidc.authorizationURL }}
+  tokenURL: {{ .Values.apiserver.env.oidc.tokenURL }}
+  userInfoURL: {{ .Values.apiserver.env.oidc.userInfoURL }}
+  logoutURL: {{ .Values.apiserver.env.oidc.logoutURL }}
+  jwksURL: {{ .Values.apiserver.env.oidc.jwksURL }}
   clientID: {{ .Values.apiserver.env.oidc.clientID }}
   clientSecret: {{ .Values.apiserver.env.oidc.clientSecret }}
   frontendLoginURL: "https://clpl.{{ .Values.tls.domain }}/login"
@@ -24,9 +30,12 @@ spec:
   redirectURL: "https://clpl.{{ .Values.tls.domain }}/v1/auth/oidc/authorize"
   scopes: 
     {{- range .Values.apiserver.env.oidc.scopes }}
-    - {{ . }}
+    - {{ . | quote }}
     {{- end }}
+  scopeDelimiter: {{ .Values.apiserver.env.oidc.scopeDelimiter }}
+  responseType: {{ .Values.apiserver.env.oidc.responseType }}
+  grantType: {{ .Values.apiserver.env.oidc.grantType }}
   userFilter: "{{ .Values.apiserver.env.oidc.userFilter }}" # force string
   userInfoPath: {{ .Values.apiserver.env.oidc.userInfoPath }}
-  userNamePath: {{ .Values.apiserver.env.oidc.userNamePath }}
+  usernamePath: {{ .Values.apiserver.env.oidc.usernamePath }}
   emailPath: {{ .Values.apiserver.env.oidc.emailPath }}

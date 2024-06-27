@@ -4,6 +4,15 @@
 
 # tmp
 tmp
+*.bak
+
+# secrets
+*.crt
+*token
+
+# binaries
+tools/maintenance/bin
+tools/maintenance/main
 
 # ignore ansible inventory
 manifests/ansible/inventory/*.ini

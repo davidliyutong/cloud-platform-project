@@ -17,6 +17,16 @@ spec:
             properties:
               baseURL:
                 type: string
+              authorizationURL:
+                type: string
+              tokenURL:
+                type: string
+              userInfoURL:
+                type: string
+              logoutURL:
+                type: string
+              jwksURL:
+                type: string
               clientID:
                 type: string
               clientSecret:
@@ -31,11 +41,17 @@ spec:
                 type: array
                 items:
                   type: string
+              scopeDelimiter:
+                type: string
+              responseType:
+                type: string
+              grantType:
+                type: string
               userFilter:
                 type: string
               userInfoPath:
                 type: string
-              userNamePath:
+              usernamePath:
                 type: string
               emailPath:
                 type: string

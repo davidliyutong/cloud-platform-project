@@ -87,23 +87,23 @@ Modify the `helm/values.yaml` to fit your needs. You can verify the installation
 
 **Basic configuration:**
 
-| Path                                  | Description                                    | Type    | Default Value        | Supported Values                          |
-| ------------------------------------- | ---------------------------------------------- | ------- | -------------------- | ----------------------------------------- |
-| `namespace`                           | The namespace where the resources are deployed | string  | `default`            | Any valid Kubernetes namespace            |
-| `rbac.create`                         | Whether to create RBAC resources               | boolean | `true`               | `true`, `false`                           |
-| `rbac.serviceAccount.name`            | The name of the service account to use         | string  | `"clpl-admin"`       | Any valid Kubernetes service account name |
-| `tls.label`                           | Label for the TLS                              | string  | `"speit-site"`       | Any string                                |
-| `tls.domain`                          | Domain for the TLS                             | string  | `"speit.site"`       | Any valid domain name                     |
-| `tls.issuer.name`                     | Name of the TLS issuer                         | string  | `letsencrypt-cf-dns` | Any valid issuer name                     |
-| `tls.issuer.kind`                     | Kind of the TLS issuer                         | string  | `ClusterIssuer`      | `ClusterIssuer`, `Issuer`                 |
-| `cloudflareIssuer.create`             | Whether to create Cloudflare issuer            | boolean | `false`              | `true`, `false`                           |
-| `cloudflareIssuer.name`               | Name of the Cloudflare issuer                  | string  | `letsencrypt-cf-dns` | Any valid issuer name                     |
-| `cloudflareIssuer.apiToken`           | API token for the Cloudflare issuer            | string  | `"your-api-token"`   | Any valid API token                       |
-| `cloudflareIssuer.apiTokenSecretName` | Secret name of the Cloudflare issuer API token | string  | `"cloudflare-api"`   | Any valid Kubernetes secret name          |
-| `cloudflareIssuer.email`              | Email associated with the Cloudflare issuer    | string  | `null`               | Any valid email address                   |
-| `ingress.enabled`                     | Whether to enable ingress                      | boolean | `true`               | `true`, `false`                           |
-| `ingress.className`                   | Class name for the ingress                     | string  | `"nginx"`            | Any valid class name                      |
-| `ingress.annotations`                 | Annotations for the ingress                    | map     | `{}`                 | Any valid annotations                     |
+| Path                                  | Description                                    | Type    | Default Value        | Supported Values                                                   |
+| ------------------------------------- | ---------------------------------------------- | ------- | -------------------- | ------------------------------------------------------------------ |
+| `namespace`                           | The namespace where the resources are deployed | string  | `default`            | Any valid Kubernetes namespace                                     |
+| `rbac.create`                         | Whether to create RBAC resources               | boolean | `true`               | `true`, `false`                                                    |
+| `rbac.serviceAccount.name`            | The name of the service account to use         | string  | `"clpl-admin"`       | Any valid Kubernetes service account name                          |
+| `tls.label`                           | Label for the TLS                              | string  | `"speit-site"`       | Any string                                                         |
+| `tls.domain`                          | Domain for the TLS                             | string  | `"speit.site"`       | Any valid domain name                                              |
+| `tls.issuer.name`                     | Name of the TLS issuer                         | string  | `letsencrypt-cf-dns` | Any valid issuer name                                              |
+| `tls.issuer.kind`                     | Kind of the TLS issuer                         | string  | `ClusterIssuer`      | `ClusterIssuer`, `Issuer`                                          |
+| `cloudflareIssuer.create`             | Whether to create Cloudflare issuer            | boolean | `false`              | `true`, `false`                                                    |
+| `cloudflareIssuer.name`               | Name of the Cloudflare issuer                  | string  | `letsencrypt-cf-dns` | Any valid issuer name                                              |
+| `cloudflareIssuer.apiToken`           | API token for the Cloudflare issuer            | string  | `"your-api-token"`   | Any valid API token, the token should be able to edit DNS settings |
+| `cloudflareIssuer.apiTokenSecretName` | Secret name of the Cloudflare issuer API token | string  | `"cloudflare-api"`   | Any valid Kubernetes secret name                                   |
+| `cloudflareIssuer.email`              | Email associated with the Cloudflare issuer    | string  | `null`               | Any valid email address                                            |
+| `ingress.enabled`                     | Whether to enable ingress                      | boolean | `true`               | `true`, `false`                                                    |
+| `ingress.className`                   | Class name for the ingress                     | string  | `"nginx"`            | Any valid class name                                               |
+| `ingress.annotations`                 | Annotations for the ingress                    | map     | `{}`                 | Any valid annotations                                              |
 
 **Database:**
 

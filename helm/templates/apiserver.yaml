@@ -70,6 +70,10 @@ spec:
               value: /var/run/secrets/kubernetes.io/serviceaccount/token
             - name: CLPL_K8S_NAMESPACE
               value: {{ .Values.namespace }}
+            - name: CLPL_OIDC_CONFIGNAME
+              value: {{ .Release.Name }}
+            - name: CLPL_SITE_CONFIGNAME
+              value: {{ .Release.Name }}
             - name: CLPL_OIDC_BASEURL
               value: {{ .Values.apiserver.env.oidc.baseURL }}
             - name: CLPL_OIDC_CLIENTID
@@ -83,13 +87,13 @@ spec:
             - name: CLPL_OIDC_REDIRECTURL
               value: "https://clpl.{{ .Values.tls.domain }}/v1/auth/oidc/authorize"
             - name: CLPL_OIDC_SCOPE
-              value: {{ join "+" .Values.apiserver.env.oidc.scopes }}
+              value: {{ .Values.apiserver.env.oidc.scopeStr | quote }}
             - name: CLPL_OIDC_USERFILTER
-              value: "{{ .Values.apiserver.env.oidc.userFilter }}" # force string
+              value: {{ .Values.apiserver.env.oidc.userFilter | quote }} # force string
             - name: CLPL_OIDC_USERINFOPATH
               value: {{ .Values.apiserver.env.oidc.userInfoPath }}
             - name: CLPL_OIDC_USERNAMEPATH
-              value: {{ .Values.apiserver.env.oidc.userNamePath }}
+              value: {{ .Values.apiserver.env.oidc.usernamePath }}
             - name: CLPL_OIDC_EMAILPATH
               value: {{ .Values.apiserver.env.oidc.emailPath }}
           ports:

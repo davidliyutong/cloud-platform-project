@@ -29,6 +29,8 @@ spec:
                 type: string
               authEndpoint:
                 type: string
+              nginxClass:
+                type: string
   scope: Namespaced
   names:
     plural: siteconfigs

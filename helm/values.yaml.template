@@ -14,14 +14,14 @@ tls:
   domain: "example.com"
   issuer:
     name: letsencrypt-cf-dns
-    kind: ClusterIssuer
+    kind: Issuer
 
 cloudflareIssuer:
   create: false
   name: clpl-issuer
   apiToken: "your-api-token"
   apiTokenSecretName: "cloudflare-api"
-  email: null
+  kind: Issuer
 
 datastore:
   create: true
@@ -70,6 +70,11 @@ apiserver:
       useOIDC: false
     oidc:
       baseURL: "https://authentik.example.com/application/o"
+      authorizationURL: ""
+      tokenURL: ""
+      userInfoURL: ""
+      logoutURL: ""
+      jwksURL: ""
       clientID: "xxx"
       clientSecret: "yyy"
       name: "cloud-platform"
@@ -77,9 +82,12 @@ apiserver:
         - openid
         - profile
         - email
+      scopeDelimiter: "+"
+      responseType: "code"
+      grantType: "authorization_code"
       userFilter: "{}"
       userInfoPath: "$"
-      userNamePath: "preferred_username"
+      usernamePath: "preferred_username"
       emailPath: "email"
 
 frontend:

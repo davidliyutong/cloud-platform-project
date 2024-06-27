@@ -6,17 +6,19 @@
     {{- fail "cloudflareIssuer.apiTokenSecretName is required" }}
   {{- end }}
 ---
+{{ if .Values.cloudflareIssuer.apiToken }}
 apiVersion: v1
 kind: Secret
 metadata:
   name: {{ .Values.cloudflareIssuer.apiTokenSecretName }}
-  namespace: cert-manager
+  namespace: {{ if eq  .Values.cloudflareIssuer.kind "Issuer" }}{{ .Values.namespace }}{{ else }}"cert-manager"{{ end }}
 type: Opaque
 stringData:
   api-token: {{ .Values.cloudflareIssuer.apiToken }}
+{{ end }}
 ---
 apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
+kind: {{ .Values.cloudflareIssuer.kind }}
 metadata:
   name: {{ .Values.cloudflareIssuer.name }} # letsencrypt-cf-dns
 spec:
