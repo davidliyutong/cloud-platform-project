@@ -1,0 +1,64 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: coder-{{ .Values.tls.label }}-tls
+  namespace: {{ .Values.namespace }}
+spec:
+  secretName: coder-{{ .Values.tls.label }}-tls
+  dnsNames:
+  - "*.coder.{{ .Values.tls.domain }}"
+  issuerRef:
+    name: {{ .Values.tls.issuer.name }}
+    kind: {{ .Values.tls.issuer.kind }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vnc-{{ .Values.tls.label }}-tls
+  namespace: {{ .Values.namespace }}
+spec:
+  secretName: vnc-{{ .Values.tls.label }}-tls
+  dnsNames:
+  - "*.vnc.{{ .Values.tls.domain }}"
+  issuerRef:
+    name: {{ .Values.tls.issuer.name }}
+    kind: {{ .Values.tls.issuer.kind }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ssh-{{ .Values.tls.label }}-tls
+  namespace: {{ .Values.namespace }}
+spec:
+  secretName: ssh-{{ .Values.tls.label }}-tls
+  dnsNames:
+  - "*.ssh.{{ .Values.tls.domain }}"
+  issuerRef:
+    name: {{ .Values.tls.issuer.name }}
+    kind: {{ .Values.tls.issuer.kind }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: apiserver-{{ .Values.tls.label }}-tls
+  namespace: {{ .Values.namespace }}
+spec:
+  secretName: apiserver-{{ .Values.tls.label }}-tls
+  dnsNames:
+  - "apiserver.{{ .Values.tls.domain }}"
+  issuerRef:
+    name: {{ .Values.tls.issuer.name }}
+    kind: {{ .Values.tls.issuer.kind }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: clpl-{{ .Values.tls.label }}-tls
+  namespace: {{ .Values.namespace }}
+spec:
+  secretName: clpl-{{ .Values.tls.label }}-tls
+  dnsNames:
+  - "clpl.{{ .Values.tls.domain }}"
+  issuerRef:
+    name: {{ .Values.tls.issuer.name }}
+    kind: {{ .Values.tls.issuer.kind }}

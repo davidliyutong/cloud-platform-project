@@ -1,0 +1,12 @@
+# IDE
+.idea
+.vscode
+
+# tmp
+tmp
+
+# ignore ansible inventory
+manifests/ansible/inventory/*.ini
+
+# ignore helmvalues.yaml
+helm/values.yaml

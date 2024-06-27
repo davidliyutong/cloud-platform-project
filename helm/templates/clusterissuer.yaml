@@ -1,0 +1,33 @@
+{{ if .Values.cloudflareIssuer.create }}
+  {{ if .Values.cloudflareIssuer.apiToken | trim | quote | eq "" }}
+    {{- fail "cloudflareIssuer.apiToken is required" }}
+  {{- end }}
+  {{ if .Values.cloudflareIssuer.apiTokenSecretName | trim | quote | eq "" }}
+    {{- fail "cloudflareIssuer.apiTokenSecretName is required" }}
+  {{- end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.cloudflareIssuer.apiTokenSecretName }}
+  namespace: cert-manager
+type: Opaque
+stringData:
+  api-token: {{ .Values.cloudflareIssuer.apiToken }}
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ .Values.cloudflareIssuer.name }} # letsencrypt-cf-dns
+spec:
+  acme:
+    privateKeySecretRef:
+      name: {{ .Values.cloudflareIssuer.name }}
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              key: api-token
+              name: {{ .Values.cloudflareIssuer.apiTokenSecretName }} # reference of Secret that saves cloudflare api token
+{{- end }}

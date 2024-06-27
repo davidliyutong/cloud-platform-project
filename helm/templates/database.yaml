@@ -1,0 +1,72 @@
+{{ if .Values.datastore.create }}
+# MongoDB StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.datastore.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  serviceName: {{ .Values.datastore.svc.name }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.datastore.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.datastore.name }}
+    spec:
+      containers:
+        - name: {{ .Values.datastore.name }}
+          image: {{ .Values.datastore.imageRef }}
+          imagePullPolicy: {{ .Values.datastore.imagePullPolicy }}
+          resources:
+            limits:
+              cpu: {{ .Values.datastore.resources.limits.cpu }}
+              memory: {{ .Values.datastore.resources.limits.memory }}
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: {{ .Values.datastore.credentials.username }}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: {{ .Values.datastore.credentials.password }}
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongodb-data
+              mountPath: /data/db
+      volumes:
+      - name: mongodb-data
+        persistentVolumeClaim:
+          claimName: {{ .Values.datastore.volume.pvc }}
+---
+# MongoDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.datastore.svc.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - port: {{ .Values.datastore.svc.port }}
+      targetPort: 27017
+  selector:
+    app: {{ .Values.datastore.name }}
+---
+{{ if .Values.datastore.volume.create }}
+# MongoDB PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.datastore.volume.pvc }}
+  namespace: {{ .Values.namespace }}
+spec:
+  storageClassName: {{ .Values.datastore.volume.storageClassName }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage:  {{ .Values.datastore.volume.storage }}
+
+{{ end }}
+---
+{{ end }}

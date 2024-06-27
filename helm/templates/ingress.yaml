@@ -1,0 +1,51 @@
+{{ if .Values.ingress.enabled }}
+# frontend Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend
+  namespace: {{ .Values.namespace }}
+  annotations: {{- toYaml $.Values.ingress.annotations | nindent 4 }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - host: clpl.{{ .Values.tls.domain }}
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: {{ .Values.frontend.svc.name }}
+                port:
+                  number: {{ .Values.frontend.svc.port }}
+  tls:
+    - hosts:
+        - clpl.{{ .Values.tls.domain }}
+      secretName: clpl-{{ .Values.tls.label }}-tls
+---
+# apiserver Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: apiserver
+  namespace: {{ .Values.namespace }}
+  annotations: {{- toYaml $.Values.ingress.annotations | nindent 4 }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - host: apiserver.{{ .Values.tls.domain }}
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: {{ .Values.apiserver.svc.name }}
+                port:
+                  number: {{ .Values.apiserver.svc.port }}
+  tls:
+    - hosts:
+        - apiserver.{{ .Values.tls.domain }}
+      secretName: apiserver-{{ .Values.tls.label }}-tls
+{{ end }}

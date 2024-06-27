@@ -1,0 +1,133 @@
+# apiserver StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.apiserver.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  serviceName: {{ .Values.apiserver.svc.name }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.apiserver.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.apiserver.name }}
+    spec:
+      serviceAccountName: clpl-admin
+      containers:
+        - name: {{ .Values.apiserver.name }}
+          image: {{ if .Values.apiserver.imageTag }}"{{ .Values.apiserver.imageRef }}:{{ .Values.apiserver.imageTag }}"{{ else }}"{{ .Values.apiserver.imageRef }}:v{{ .Release.version }}"{{ end }}
+          imagePullPolicy: {{ .Values.apiserver.imagePullPolicy }}
+          resources:
+            limits:
+              cpu: {{ .Values.apiserver.resources.limits.cpu }}
+              memory: {{ .Values.apiserver.resources.limits.memory }}
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+          env:
+            - name: CLPL_API_NUMWORKERS
+              value: "{{ .Values.apiserver.env.api.numWorkers }}"
+            - name: CLPL_DEBUG
+              value: "{{ .Values.apiserver.env.api.debug }}"
+            - name: CLPL_DB_HOST
+              value: "{{ .Values.datastore.svc.name }}.{{ .Values.namespace }}.svc.cluster.local"
+            - name: CLPL_DB_PORT
+              value: "{{ .Values.datastore.svc.port }}"
+            - name: CLPL_DB_USERNAME
+              value: {{ .Values.datastore.credentials.username }}
+            - name: CLPL_DB_PASSWORD
+              value: {{ .Values.datastore.credentials.password }}
+            - name: CLPL_CONFIG_TOKENSECRET
+              value: {{ .Values.apiserver.env.config.tokenSecret }}
+            - name: CLPL_CONFIG_CODERHOSTNAME
+              value: coder.{{ .Values.tls.domain }}
+            - name: CLPL_CONFIG_CODERTLSSECRET
+              value: coder-{{ .Values.tls.label }}-tls
+            - name: CLPL_CONFIG_VNCHOSTNAME
+              value: vnc.{{ .Values.tls.domain }}
+            - name: CLPL_CONFIG_VNCTLSSECRET
+              value: vnc-{{ .Values.tls.label }}-tls
+            - name: CLPL_CONFIG_SSHHOSTNAME
+              value: ssh.{{ .Values.tls.domain }}
+            - name: CLPL_CONFIG_SSHTLSSECRET
+              value: ssh-{{ .Values.tls.label }}-tls
+            - name: CLPL_CONFIG_NGINXCLASS
+              value: {{ .Values.ingress.className }}
+            - name: CLPL_CONFIG_AUTHENDPOINT
+              value: http://apiserver.clpl.svc.cluster.local:8080
+            - name: CLPL_CONFIG_USEOIDC
+              value: "{{ .Values.apiserver.env.config.useOIDC }}"
+            - name: CLPL_K8S_HOST
+              value: kubernetes.default.svc.cluster.local
+            - name: CLPL_K8S_PORT
+              value: "6443"
+            - name: CLPL_K8S_CACERT
+              value: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            - name: CLPL_K8S_TOKEN
+              value: /var/run/secrets/kubernetes.io/serviceaccount/token
+            - name: CLPL_K8S_NAMESPACE
+              value: {{ .Values.namespace }}
+            - name: CLPL_OIDC_BASEURL
+              value: {{ .Values.apiserver.env.oidc.baseURL }}
+            - name: CLPL_OIDC_CLIENTID
+              value: {{ .Values.apiserver.env.oidc.clientID }}
+            - name: CLPL_OIDC_CLIENTSECRET
+              value: {{ .Values.apiserver.env.oidc.clientSecret }}
+            - name: CLPL_OIDC_FRONTENDLOGINURL
+              value: {{ .Values.apiserver.env.oidc.frontendLoginURL }}
+            - name: CLPL_OIDC_NAME
+              value: {{ .Values.apiserver.env.oidc.name }}
+            - name: CLPL_OIDC_REDIRECTURL
+              value: {{ .Values.apiserver.env.oidc.redirectURL }}
+            - name: CLPL_OIDC_SCOPE
+              value: {{ .Values.apiserver.env.oidc.scopes }}
+            - name: CLPL_OIDC_USERFILTER
+              value: "{{ .Values.apiserver.env.oidc.userFilter }}"
+            - name: CLPL_OIDC_USERINFOPATH
+              value: {{ .Values.apiserver.env.oidc.userInfoPath }}
+            - name: CLPL_OIDC_USERNAMEPATH
+              value: {{ .Values.apiserver.env.oidc.userNamePath }}
+            - name: CLPL_OIDC_EMAILPATH
+              value: {{ .Values.apiserver.env.oidc.emailPath }}
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: apiserver-logs
+              mountPath: /opt/app/logs
+      volumes:
+      - name: apiserver-logs
+        persistentVolumeClaim:
+          claimName: {{ .Values.apiserver.volume.pvc }}
+---
+# apiserver Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.apiserver.svc.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - port: {{ .Values.apiserver.svc.port }}
+      targetPort: 8080
+  selector:
+    app: {{ .Values.apiserver.name }}
+---
+{{ if .Values.apiserver.volume.create }}
+# apiserver PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.apiserver.volume.pvc }}
+  namespace: {{ .Values.namespace }}
+spec:
+  storageClassName: {{ .Values.apiserver.volume.storageClassName }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.apiserver.volume.storage }} # CHANGE ME
+{{ end }}
+---

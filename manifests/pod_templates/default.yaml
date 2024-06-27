@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    k8s-app: ${{ POD_LABEL }}
+  name: clpl-pvc-${{ POD_ID }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: ${{ POD_STORAGE_LIM }} # CHANGE ME Storage Limit
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: ${{ POD_LABEL }}
+  name: clpl-${{ POD_ID }}
+spec:
+  replicas: ${{ POD_REPLICAS }}
+  selector:
+    matchLabels:
+      k8s-app: ${{ POD_LABEL }}
+  template:
+    metadata:
+      labels:
+        k8s-app: ${{ POD_LABEL }}
+    spec:
+      containers:
+      - image: ${{ TEMPLATE_IMAGE_REF }} # CHANGE ME
+        imagePullPolicy: Always
+        name: container-0
+        ports:
+        - containerPort: 3000
+          name: 3000tcp
+          protocol: TCP
+        - containerPort: 80
+          name: 80tcp
+          protocol: TCP
+        - containerPort: 2222
+          name: 2222tcp
+          protocol: TCP
+        resources: # CHANGE ME
+          limits:
+            cpu: ${{ POD_CPU_LIM }}
+            memory: ${{ POD_MEM_LIM }}
+          requests:
+            cpu: 50m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities: {}
+          privileged: false
+          readOnlyRootFilesystem: false
+        volumeMounts:
+        - mountPath: /home/ubuntu
+          name: home
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: home
+        persistentVolumeClaim:
+          claimName: clpl-pvc-${{ POD_ID }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: ${{ POD_LABEL }}
+  name: clpl-svc-${{ POD_ID }}
+spec:
+  ports:
+  - name: 3000tcp
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  - name: 6080tcp80
+    port: 6080
+    protocol: TCP
+    targetPort: 80
+  - name: 22tcp2222
+    port: 22
+    protocol: TCP
+    targetPort: 2222
+  selector:
+    k8s-app: ${{ POD_LABEL }}
+  sessionAffinity: None
+  type: ClusterIP

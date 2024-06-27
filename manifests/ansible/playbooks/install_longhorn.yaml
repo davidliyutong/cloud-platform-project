@@ -1,0 +1,72 @@
+- hosts: all
+  gather_facts: no
+  vars_prompt:
+    - name: "host"
+      prompt: "please enter the target where kubectl is configured to operate the cluster from: {{ ansible_play_hosts }} and 'localhost'"
+      private: no
+  tasks:
+    - add_host:
+        name: "{{ host }}"
+        groups: chosen_server_host
+
+- hosts: chosen_server_host
+  vars_prompt:
+    - name: "longhorn_version"
+      prompt: "Please enter the Longhorn version to install"
+      private: no
+      default: "v1.6.0"
+  tasks:
+    - name: Check kubectl
+      block:
+        - name: Check if kubectl is installed
+          shell: bash -l -c 'kubectl version'
+          register: kubectl_version
+          ignore_errors: true
+        - debug:
+            msg: "kubectl is not installed on the target host. Please install kubectl and try again."
+          when: kubectl_version.rc != 0
+        - debug:
+            msg: "kubectl is present on the target host. version={{ kubectl_version.stdout }}"
+          when: kubectl_version.rc == 0
+
+    - name: Install longhorn
+      block:
+        - name: Check longhorn version
+          fail:
+            msg: "Longhorn version is not valid. Please enter a valid version."
+          when: longhorn_version is not match('v[0-9]+\.[0-9]+\.[0-9]+')
+
+        - name: Check if Longhorn is installed
+          shell: bash -l -c 'kubectl get ns longhorn-system'
+          register: longhorn_ns
+          ignore_errors: true
+
+        - fail:
+            msg: "Longhorn is already installed on the target host."
+          when: longhorn_ns.rc == 0
+
+        - name: Execute Longhorn check script
+          shell: bash -l -c 'curl -sSfL https://raw.githubusercontent.com/longhorn/longhorn/{{ longhorn_version }}/scripts/environment_check.sh | bash'
+          register: longhorn_check
+          ignore_errors: true
+
+        - debug:
+            msg: "Longhorn check script executed successfully."
+          when: longhorn_check.rc == 0
+        - fail:
+            msg: "Longhorn check script failed. Please check the logs for more information."
+          when: longhorn_check.rc != 0
+
+        - name: Install Longhorn
+          shell: bash -l -c 'kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/{{ longhorn_version }}/deploy/longhorn.yaml'
+          register: longhorn_install
+          ignore_errors: true
+          when: longhorn_ns.rc != 0
+
+        - debug:
+            msg: "Longhorn is installed on the target host."
+          when: longhorn_install.rc == 0
+
+        - debug:
+            msg: "Longhorn is not installed on the target host. Please check the logs for more information."
+          when: longhorn_install.rc != 0

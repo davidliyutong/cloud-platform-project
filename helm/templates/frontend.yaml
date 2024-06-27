@@ -1,0 +1,53 @@
+---
+{{ if eq .Values.frontend.env.coreDNS "" }}
+{{ required "The value .Values.frontend.env.coreDNS cannot be empty" .Values.item }}
+{{ end }}
+# frontend deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.frontend.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.frontend.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.frontend.name }}
+    spec:
+      containers:
+        - name: {{ .Values.frontend.name }}
+          image: {{ if .Values.frontend.imageTag }}"{{ .Values.frontend.imageRef }}:{{ .Values.frontend.imageTag }}"{{ else }}"{{ .Values.frontend.imageRef }}:v{{ .Release.version }}"{{ end }}
+          ports:
+            - name: 80tcp
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: CLPL_BACKEND_URL # need to match the backend
+              value: "http://{{ .Values.apiserver.svc.name }}.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.apiserver.svc.port }}"
+            - name: CLPL_DNS_RESOLVER
+              value: {{ .Values.frontend.env.coreDNS }}
+          resources:
+            limits:
+              cpu: {{ .Values.frontend.resources.limits.cpu }}
+              memory: {{ .Values.frontend.resources.limits.memory }}
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+---
+# frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.frontend.svc.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - port: {{ .Values.frontend.svc.port }}
+      targetPort: 80
+  selector:
+    app: {{ .Values.frontend.name }}
+---

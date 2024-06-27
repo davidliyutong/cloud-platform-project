@@ -1,0 +1,76 @@
+---
+- hosts: all
+  gather_facts: no
+  vars_prompt:
+    - name: "host"
+      prompt: "please enter the target hostname (server) from: {{ ansible_play_hosts }}"
+      private: no
+  tasks:
+    - add_host:
+        name: "{{ host }}"
+        groups: remote
+
+- hosts: remote
+  gather_facts: no
+  tasks:
+    - name: Gather facts
+      setup:
+        filter: ansible_devices
+
+    - name: List unformatted disks
+      set_fact:
+       unformatted_disks: "{{ ansible_facts.devices | dict2items | selectattr('value.partitions', 'equalto', {}) | map(attribute='key') | list | select('match', '^sd.*') | list }}"
+
+    - name: Display unformatted disks
+      debug:
+        var: unformatted_disks
+
+    - name: Prompt for disk to format
+      pause:
+        prompt: "Please enter the name of the disk to format from {{ unformatted_disks }}"
+      register: disk_to_format
+
+    - debug:
+        msg: "/dev/{{ disk_to_format.user_input }} will be formatted in 10 seconds."
+
+    - name: Wait for 10 seconds
+      pause:
+        seconds: 10
+
+    - name: Create a new partition
+      command: "parted -s /dev/{{ disk_to_format.user_input }} -- mklabel gpt mkpart primary ext4 0% 100%"
+      become: yes
+
+    - name: Format the device
+      command: "mkfs.ext4 /dev/{{ disk_to_format.user_input }}1"
+      become: yes
+
+    - name: Get the UUID of the device
+      shell: "lsblk -o NAME,UUID | grep {{ disk_to_format.user_input }}1 | awk '{print $2}'"
+      register: result
+      become: yes
+
+    - name: Show the UUID of the device
+      debug:
+        var: result.stdout
+
+    - name: Create mount point
+      file:
+        path: "/mnt/{{ disk_to_format.user_input }}"
+        state: directory
+      become: yes
+
+    - name: Add entry to /etc/fstab
+      lineinfile:
+        path: "/etc/fstab"
+        line: "UUID={{ result.stdout }} /mnt/{{ disk_to_format.user_input }} ext4 defaults 0 0"
+      become: yes
+
+    - name: Reload systemd manager configuration
+      systemd:
+        daemon_reload: yes
+      become: yes
+
+    - name: Mount all filesystems
+      command: mount -a
+      become: yes

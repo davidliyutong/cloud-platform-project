@@ -1,0 +1,60 @@
+- hosts: all
+  gather_facts: no
+  vars_prompt:
+    - name: "host"
+      prompt: "please enter the target where kubectl is configured to operate the cluster from: {{ ansible_play_hosts }} and 'localhost'"
+      private: no
+  tasks:
+    - add_host:
+        name: "{{ host }}"
+        groups: chosen_server_host
+
+- hosts: chosen_server_host
+  vars_prompt:
+    - name: "certmanager_version"
+      prompt: "Please enter the default Cert-Manager version to install"
+      private: no
+      default: "v1.15.1"
+  tasks:
+    - name: Check kubectl
+      block:
+        - name: Check if kubectl is installed
+          shell: bash -l -c 'kubectl version'
+          register: kubectl_version
+          ignore_errors: true
+        - debug:
+            msg: "kubectl is not installed on the target host. Please install kubectl and try again."
+          when: kubectl_version.rc != 0
+        - debug:
+            msg: "kubectl is present on the target host. version={{ kubectl_version.stdout }}"
+          when: kubectl_version.rc == 0
+
+    - name: Install Cert-Manager
+      block:
+        - name: Check Cert-Manager version
+          fail:
+            msg: "Cert-Manager version is not valid. Please enter a valid version."
+          when: certmanager_version is not match('v[0-9]+\.[0-9]+\.[0-9]+')
+
+        - name: Check if Cert-Manager is installed
+          shell: bash -l -c 'kubectl get ns cert-manager'
+          register: certmanager_ns
+          ignore_errors: true
+
+        - fail:
+            msg: "Cert-Manager is already installed on the target host."
+          when: certmanager_ns.rc == 0
+
+        - name: Install Cert-Manager
+          shell: bash -l -c 'kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/{{ certmanager_version }}/cert-manager.yaml'
+          register: certmanager_install
+          ignore_errors: true
+          when: certmanager_ns.rc != 0
+
+        - debug:
+            msg: "Cert-Manager is installed on the target host."
+          when: certmanager_install.rc == 0
+
+        - debug:
+            msg: "Cert-Manager is not installed on the target host. Please check the logs for more information."
+          when: certmanager_install.rc != 0
