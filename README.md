@@ -1,5 +1,7 @@
 # Cloud Platform Project
 
+![banner](./docs/imgs/banner.png)
+
 This project provide Web based coding solution for small companies / labs. It orchestras WebIDE containers, shared volumes, etc. in a Kubernetes cluster. Here is the navigation of the project:
 
 | Repo                                                                                  | Description |
