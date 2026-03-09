@@ -105,8 +105,8 @@ total number of users. Limited to admins.
 - Request Query:
 
     ```conf
-     "index_start"= -1
-     "index_end"= -1,
+     "skip"= 0
+     "limit"= null,
      "filter"= ""
     ```
 
@@ -270,8 +270,8 @@ API returns profiles of templates and total number of templates. Limited to admi
 - Request Query:
 
     ```conf
-     "index_start"= -1
-     "index_end"= -1,
+     "skip"= 0
+     "limit"= null,
      "filter"= ""
     ```
 
@@ -435,8 +435,8 @@ pods. Limited to admins.
 - Request Query:
 
     ```conf
-     "index_start"= -1
-     "index_end"= -1,
+     "skip"= 0
+     "limit"= null,
      "filter"= ""
     ```
 
@@ -671,8 +671,8 @@ API returns profiles of templates and total number of templates.
 - Request Query:
 
     ```conf
-     "index_start"= -1
-     "index_end"= -1,
+     "skip"= 0
+     "limit"= null,
      "filter"= ""
     ```
 
@@ -741,8 +741,8 @@ pods and total number of pods.
 - Request Query:
 
     ```conf
-     "index_start"= -1
-     "index_end"= -1,
+     "skip"= 0
+     "limit"= null,
      "filter"= ""
     ```
 
